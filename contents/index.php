@@ -4,3 +4,4 @@
   echo $_SERVE['SERVE_ADDR'] . "<br />";
   echo date("Y/m/d H:i:s");
 ?>
+こんにちは
