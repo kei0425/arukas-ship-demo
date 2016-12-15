@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>OCR on JavaScript Demo Page</title>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdn.rawgit.com/naptha/tesseract.js/0.2.0/dist/tesseract.js"></script>
+        <script type="text/javascript">
+        <!--
+            $(function() {
+                /**************************************************
+                /
+                / Main
+                /
+                /**************************************************/
+                var drag_and_drop_msg = "画像ファイルをドラッグ & ドロップしてください。";
+                $("#drag_and_drop_area").html(drag_and_drop_msg);
+
+                function recognizeImage(file_obj) {
+                    $("#result_area").html("");
+                    if(!file_obj.type.match(/^image/)) {
+                        alert("画像ファイルを選択してください。");
+                        return false;
+                    }
+                    $("#window_wrapper").show();
+
+                    // progress
+                    $("#drag_and_drop_area").html("");
+                    var timer = setInterval(function() {
+                        if($("#drag_and_drop_area").html().length > 40) {
+                            $("#drag_and_drop_area").html("");
+                        }
+                        $("#drag_and_drop_area").html($("#drag_and_drop_area").html() + "#");
+                    }, 100);
+
+                    // ocr
+                    Tesseract.recognize(file_obj, {lang: "jpn"})
+                        .progress(function(p) {
+                            console.log(p);
+                        })
+                        .catch(function(e) {
+                            alert(e);
+                            $("#drag_and_drop_area").html(drag_and_drop_msg);
+                            $("#window_wrapper").hide();
+                        })
+                        .then(function(r) {
+                            clearInterval(timer);
+                            $("#drag_and_drop_area").html(drag_and_drop_msg);
+                            $("#result_area").html(r.text.replace(/\r?\n/g, "<br />"));
+                            $("#window_wrapper").hide();
+                        });
+                }
+
+                /**************************************************
+                /
+                / Drag and Drop
+                /
+                /**************************************************/
+                $(document).on("dragover", function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    e.originalEvent.dataTransfer.dropEffect = "none";
+                });
+
+                $(document).on("drop", function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+
+                $("#drag_and_drop_area").on("dragenter", function(e) {
+                    $("#drag_and_drop_area").css("background-color", "#DDD");
+                });
+
+                $("#drag_and_drop_area").on("dragleave", function(e) {
+                    $("#drag_and_drop_area").css("background-color", "");
+                });
+
+                $("#drag_and_drop_area").on("dragover", function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    e.originalEvent.dataTransfer.dropEffect = "copy";
+                });
+
+                $("#drag_and_drop_area").on("drop", function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    $("#drag_and_drop_area").css("background-color", "");
+
+                    if(e.originalEvent.dataTransfer.files.length > 0) {
+                        recognizeImage(e.originalEvent.dataTransfer.files[0]);
+                    }
+                });
+            });
+        -->
+        </script>
+        <style type="text/css">
+        <!--
+            html, body {
+                height: 100%;
+                margin: 0px;
+            }
+            body {
+                font-family: arial, sans-serif;
+                font-size: 20px;
+                font-weight: bold;
+                color: #AAA;
+            }
+            #main {
+                width: 500px;
+                height: 100%;
+                margin: 0px auto;
+                padding: 10px 0px;
+                text-align: center;
+            }
+            #window_wrapper {
+                z-index: 999;
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                background-color: #AAA;
+                opacity: 0.8;
+                cursor: wait;
+                display: none;
+            }
+            #drag_and_drop_area {
+                width: 100%;
+                height: 100px;
+                margin: 0px auto;
+                border: 5px dashed #AAA;
+                line-height: 100px;
+            }
+            #result_area {
+                width: 100%;
+                margin: 10px auto 0px;
+                text-align: left;
+            }
+        -->
+        </style>
+    </head>
+    <body>
+        <div id="main">
+            <div id="window_wrapper"></div>
+            <div id="drag_and_drop_area"></div>
+            <div id="result_area"></div>
+        </div>
+    </body>
+</html>
